@@ -8,12 +8,16 @@ import EmailView from "@/components/EmailView";
 import { getEmails } from "../actions";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: localStorage.getItem("openai_key") as string,
-  dangerouslyAllowBrowser: true,
-});
+var openAIKey: string;
+if (typeof window !== "undefined") {
+  openAIKey = localStorage.getItem("openai_key") as string;
+}
 
 async function classifyEmail(text: string) {
+  const openai = new OpenAI({
+    apiKey: openAIKey,
+    dangerouslyAllowBrowser: true,
+  });
   return await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [
@@ -44,7 +48,6 @@ const LocalClassifiedEmails = {
 
 export default function EmailsPage() {
   const { data: session } = useSession();
-  const openAIKey = localStorage.getItem("openai_key") || null;
   if (!openAIKey) redirect("/");
 
   const searchParams = useSearchParams();

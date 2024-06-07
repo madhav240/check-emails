@@ -6,7 +6,6 @@ import { redirect } from "next/navigation";
 
 export default function Home() {
   const { data: session } = useSession();
-  const openAIKey = localStorage.getItem("openai_key") || null;
 
   function saveOpenAIKey(formData: FormData) {
     const key = formData.get("key");
@@ -18,7 +17,7 @@ export default function Home() {
     <div className="flex flex-col justify-center items-center min-h-screen">
       {session ? (
         <>
-          {openAIKey ? (
+          {localStorage.getItem("openai_key") ? (
             <>
               <Link
                 href={"/emails"}
