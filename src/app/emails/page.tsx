@@ -158,7 +158,7 @@ export default function EmailsPage() {
           <div className="relative">
             <select
               name="emails-number"
-              className="px-2 py-1 outline-none"
+              className="px-2 py-1 outline-none bg-white"
               value={selectedEmailsNum}
               onChange={(e) => setSelectedEmailsNum(e.target.value)}
             >
@@ -179,7 +179,7 @@ export default function EmailsPage() {
               Classify
             </button>
           </div>
-          <div className="p-1 mt-2 h-[85vh] overflow-y-auto">
+          <div className="p-1 mt-2 h-[83vh] overflow-y-auto">
             {emails.map((email, index) => (
               <Link href={"?id=" + index} key={index}>
                 <EmailCard data={email} key={index} />

@@ -11,7 +11,7 @@ export default function EmailView({ data }) {
           href={"?"}
           className="w-fit absolute z-10 flex flex-row justify-center bg-white items-center px-4 right-0 left-0 mx-auto  mt-1 border "
         >
-          EXIT
+          CLOSE
         </Link>
         <div className="overflow-y-auto h-full px-2">
           <div className="relative pt-4 w-full mt-8">
@@ -26,7 +26,7 @@ export default function EmailView({ data }) {
               <EmailClassSpan classification={data.classification} />
             </div>
           </div>
-          <p>{data.message}</p>
+          <p className="break-words">{data.message}</p>
         </div>
       </div>
     </>
