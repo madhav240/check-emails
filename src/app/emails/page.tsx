@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import EmailCard from "@/components/EmailCard";
 import Link from "next/link";
 import EmailView from "@/components/EmailView";
-import { getEmails } from "../actions";
+import { getEmailData, getLastEmailsData } from "../server-actions";
 import OpenAI from "openai";
 
 var openAIKey: string;
@@ -51,9 +51,9 @@ export default function EmailsPage() {
   if (!openAIKey) redirect("/");
 
   const searchParams = useSearchParams();
-  let selectedEmailID = parseInt(searchParams.get("id"));
+  let selectedEmailID = parseInt(searchParams.get("id") as string);
 
-  const [selectedEmailsNum, setSelectedEmailsNum] = useState(15);
+  const [selectedEmailsNum, setSelectedEmailsNum] = useState(1);
   const [emails, setEmails] = useState([]);
   const loaderRef = useRef();
 
@@ -88,7 +88,6 @@ export default function EmailsPage() {
         } catch (error) {
           alert(error);
           showLoader(false);
-
           return;
         }
       }
@@ -102,43 +101,53 @@ export default function EmailsPage() {
 
   useEffect(() => {
     showLoader();
-    getEmails(selectedEmailsNum).then(async (emails) => {
+
+    getLastEmailsData(selectedEmailsNum).then(async (emailsData) => {
       const _emails = [];
-      for (let i = 0; i < emails.length; i++) {
-        let email = await emails[i];
+      const localEmails = JSON.parse(localStorage.getItem("emails") || "{}");
 
-        let message = "";
-        if (email.payload.parts) {
-          message = atob(
-            email.payload.parts[0].body.data
-              .replace(/-/g, "+")
-              .replace(/_/g, "/")
-          );
+      for (let i = 0; i < emailsData.length; i++) {
+        let emailID = emailsData[i].id;
+        if (emailID in localEmails) {
+          _emails.push(localEmails[emailID]);
         } else {
-          message = atob(
-            email.payload.body.data.replace(/-/g, "+").replace(/_/g, "/")
-          );
+          let email = await getEmailData(emailID);
+          let message = "";
+          if (email.payload?.parts) {
+            message = atob(
+              email.payload.parts[0].body.data
+                .replace(/-/g, "+")
+                .replace(/_/g, "/")
+            );
+          } else {
+            message = atob(
+              email.payload.body.data.replace(/-/g, "+").replace(/_/g, "/")
+            );
+          }
+
+          email = {
+            id: emailID,
+            snippet: email.snippet,
+            subject: email.payload.headers.filter(
+              (v) => v.name === "Subject"
+            )[0].value,
+            from: email.payload.headers.filter((v) => v.name === "From")[0]
+              .value,
+            message: message,
+          };
+
+          localEmails[emailID] = email;
+          const localClassifiedEmails = LocalClassifiedEmails.get();
+          if (emailID in localClassifiedEmails) {
+            email.classification = localClassifiedEmails[emailID];
+          }
+          _emails.push(email);
         }
-
-        email = {
-          id: email.id,
-          snippet: email.snippet,
-          subject: email.payload.headers.filter((v) => v.name === "Subject")[0]
-            .value,
-          from: email.payload.headers.filter((v) => v.name === "From")[0].value,
-          message: message,
-        };
-
-        const localClassifiedEmails = LocalClassifiedEmails.get();
-        if (email.id in localClassifiedEmails) {
-          email.classification = localClassifiedEmails[email.id];
-        }
-
-        _emails.push(email);
       }
 
-      showLoader(false);
       setEmails(_emails);
+      localStorage.setItem("emails", JSON.stringify(localEmails));
+      showLoader(false);
     });
   }, [selectedEmailsNum]);
 
