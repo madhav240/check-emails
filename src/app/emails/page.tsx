@@ -53,7 +53,7 @@ export default function EmailsPage() {
   const searchParams = useSearchParams();
   let selectedEmailID = parseInt(searchParams.get("id") as string);
 
-  const [selectedEmailsNum, setSelectedEmailsNum] = useState(1);
+  const [selectedEmailsNum, setSelectedEmailsNum] = useState(15);
   const [emails, setEmails] = useState([]);
   const loaderRef = useRef();
 
