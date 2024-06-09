@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import EmailCard from "@/components/EmailCard";
 import Link from "next/link";
 import EmailView from "@/components/EmailView";
-import { getEmailData, getLastEmailsData } from "../server-actions";
+import { getEmailData, getLastEmailsData } from "@/server-actions";
 import OpenAI from "openai";
 
 var openAIKey: string;
@@ -19,7 +19,7 @@ async function classifyEmail(text: string) {
     dangerouslyAllowBrowser: true,
   });
   return await openai.chat.completions.create({
-    model: "gpt-4om",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",
