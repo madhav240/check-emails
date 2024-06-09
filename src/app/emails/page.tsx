@@ -19,7 +19,7 @@ async function classifyEmail(text: string) {
     dangerouslyAllowBrowser: true,
   });
   return await openai.chat.completions.create({
-    model: "gpt-4o",
+    model: "gpt-4om",
     messages: [
       {
         role: "system",
@@ -113,16 +113,21 @@ export default function EmailsPage() {
         } else {
           let email = await getEmailData(emailID);
           let message = "";
-          if (email.payload?.parts) {
-            message = atob(
-              email.payload.parts[0].body.data
-                .replace(/-/g, "+")
-                .replace(/_/g, "/")
-            );
-          } else {
-            message = atob(
-              email.payload.body.data.replace(/-/g, "+").replace(/_/g, "/")
-            );
+
+          try {
+            if (email.payload?.parts) {
+              message = atob(
+                email.payload.parts[0].body.data
+                  .replace(/-/g, "+")
+                  .replace(/_/g, "/")
+              );
+            } else {
+              message = atob(
+                email.payload.body.data.replace(/-/g, "+").replace(/_/g, "/")
+              );
+            }
+          } catch (error) {
+            message = email.snippet;
           }
 
           email = {
